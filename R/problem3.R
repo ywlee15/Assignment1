@@ -1,3 +1,4 @@
+rm(list = ls())
 # (a)
 numerical_diff = function(f, x, h = 1e-6, method = "central")
 {
@@ -48,7 +49,6 @@ df = data.frame(
   Central = y_central,
   Analytical = y_true
 )
-str(df)
 
 p = ggplot(df, aes(x = x, group = 1)) +
   geom_line(aes(y = Forward, color = "Forward")) +
@@ -68,3 +68,48 @@ print(p)
 
 ## 그래프 저장
 ggsave("plots/problem3.png", plot = p)
+
+
+
+
+
+# (b)
+newtown_rapshon = function(f, fprime = NULL, x0, maxiter = 100, h = 1e-6, epsilon = 1e-10)
+{
+  x_t_1 = x0
+  
+  for (t in 1:maxiter)
+  {
+    # 도함수 계산
+    if(is.null(fprime))
+    {
+      derivative = numerical_diff(f, x_t_1, h = h, method = "central")
+    }
+    else
+    {
+      derivative = fprime(x_t_1)
+    }
+    
+    # Newton-Rapshon 
+    x_t = x_t_1 - f(x_t_1) / derivative
+    
+    if (abs(x_t - x_t_1) < epsilon)
+    {
+      return(x_t)
+    }
+    
+    x_t_1 = x_t
+  }
+  return(x_t_1)
+}
+
+
+
+# (c)
+## 수치미분 버전
+root_numerical = newtown_rapshon(f, x0 = 0.5)
+root_numerical
+
+## 도함수 제공 버전
+root_analytical = newtown_rapshon(f, fprime = f_prime, x0 = 0.5)
+root_analytical
